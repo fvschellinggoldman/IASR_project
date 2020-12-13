@@ -2,7 +2,7 @@
 
 Git for the Image and Speech Recognition project: Recognizing and solving a Sudoku
 
-Project was completed by Luka Przic, Avaya Kuvanagua and Fabio von Schelling Goldman
+Project was completed by Luka Przic, Anugu Kavya and Fabio von Schelling Goldman
 
 Project breaks down into 5 main parts:
 1. Data loading and preprocessing
