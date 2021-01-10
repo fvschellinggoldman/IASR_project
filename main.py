@@ -11,14 +11,19 @@ def load_data_from_folder(folder_location="."):
     # indicates that directory path is being given
     # This for now will be a prototype function to load a single image
     images_data = []
+    data_files = []
     for filename in os.listdir(folder_location):
         if filename.endswith(".jpg"):
-            print(filename)
+            print("Working with {}.".format(filename))
             images_data.append(cv2.imread(os.path.join(folder_location, filename), cv2.IMREAD_GRAYSCALE))
             # cv2.imshow("t", images_data[0])
+        elif filename.endswith(".dat"):
+            with open(filename) as f:
+                cleaned_data = [i.strip().split(" ") for i in f.readlines()[2:]]
+                data_files.append(cleaned_data)
         else:
             continue
-    return images_data
+    return images_data, data_files
 
 
 def recognize_board(image, threshhold_low=30, threshhold_high=60):
@@ -78,19 +83,19 @@ def recognize_board(image, threshhold_low=30, threshhold_high=60):
     # cv2.destroyAllWindows()  # destroys the window showing image
 
     contours, hierarchy = cv2.findContours(grad, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    print("Total Number of Contours found using sobel =", len(contours))
+    #print("Total Number of Contours found using sobel =", len(contours))
     largest_contour = sorted(contours, key=cv2.contourArea, reverse=True)[0]
     # print(largest_contour)
     contours, hierarchy = cv2.findContours(proc, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    print("Total Number of Contours found using blur =", len(contours))
+    #print("Total Number of Contours found using blur =", len(contours))
     largest_contour = sorted(contours, key=cv2.contourArea, reverse=True)[0]
     # print(largest_contour)
     contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    print("Total Number of Contours found using canny =", len(contours))
+    #print("Total Number of Contours found using canny =", len(contours))
     largest_contour = sorted(contours, key=cv2.contourArea, reverse=True)[0]
     # print(largest_contour)
     contours, hierarchy = cv2.findContours(lapl, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    print("Total Number of Contours found using Laplacian =", len(contours))
+    #print("Total Number of Contours found using Laplacian =", len(contours))
     largest_contour = sorted(contours, key=cv2.contourArea, reverse=True)[0]
     # print(largest_contour)
     bottom_right, _ = max(enumerate([pt[0][0] + pt[0][1] for pt in largest_contour]), key=operator.itemgetter(1))
@@ -133,6 +138,7 @@ def rec_numbers_alt(image, model):
     cell_width = int(width_of_image / 9)
     cell_height = int(height_of_image / 9)
     curr_row_pixel = 0
+    full_board = []
     for row in range(9):
         curr_col_pixel = 0
         full_row = []
@@ -175,8 +181,8 @@ def rec_numbers_alt(image, model):
             # Problem: very, very blurry
             curr_col_pixel += cell_width
         curr_row_pixel += cell_height
-        print(full_row)
-    return image
+        full_board.append(full_row)
+    return image, full_board
 
 
 def pre_process_image(img, skip_dilate=False):
@@ -317,12 +323,33 @@ def size_of_side(p1, p2):
     return np.sqrt((x ** 2) + (y ** 2))
 
 
+def evaluate_scanned(sudoku, data_file):
+    correct_counter = 0
+    row = 0
+    for rec_row, act_row in zip(sudoku, data_file):
+        col = 0
+        for rec_num, act_num in zip(rec_row, act_row):
+            if rec_num == int(act_num):
+                correct_counter += 1
+            else:
+                sudoku[row][col] = act_num
+            col += 1
+        row += 1
+
+    corr_pct = round(100 * correct_counter / 81, 2)
+    err_pct = 100 - corr_pct
+    print("We got {} cells correct, which translates to {} percent correct and {} percent false.".format(correct_counter, corr_pct, err_pct))
+    print("To ensure a working solver we changed all the wrong recognitions to their actual number.")
+    return
+
+
 def main():
-    images = load_data_from_folder()
+    images, data_files = load_data_from_folder()
     model = load_digit_classifier()
-    for image in images:
+    for image, data_file in zip(images, data_files):
         warped = recognize_board(image)
-        sudoku = rec_numbers_alt(warped, model)
+        sudoku, sudoku_grid = rec_numbers_alt(warped, model)
+        evaluate_scanned(sudoku_grid, data_file)
         # solved_sudoku = solve_sudoku(sudoku)
         # evaluate_result()
     # total_evaluation()
