@@ -145,7 +145,7 @@ def rec_numbers_alt(image, model):
         for col in range(9):
             cell = image[curr_row_pixel:curr_row_pixel + cell_height, curr_col_pixel:curr_col_pixel + cell_width]
             # print(cell.sum())
-            if cell.sum() < 150000:
+            if cell[25:35, 25:35].sum() < 0.9 * (255 * 100):  # more than 90 percent of the center is filled
                 # print("Unnumbered Cell")
                 full_row.append(0)
                 # Problem: very, very blurry
@@ -332,12 +332,14 @@ def evaluate_scanned(sudoku, data_file):
             if rec_num == int(act_num):
                 correct_counter += 1
             else:
-                sudoku[row][col] = act_num
+                sudoku[row][col] = int(act_num)
+                print("Number predicted: {} and Number actually: {}".format(rec_num, act_num))
+
             col += 1
         row += 1
 
     corr_pct = round(100 * correct_counter / 81, 2)
-    err_pct = 100 - corr_pct
+    err_pct = round(100 - corr_pct, 2)
     print("We got {} cells correct, which translates to {} percent correct and {} percent false.".format(correct_counter, corr_pct, err_pct))
     print("To ensure a working solver we changed all the wrong recognitions to their actual number.")
     return
