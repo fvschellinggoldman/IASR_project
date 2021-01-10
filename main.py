@@ -145,12 +145,7 @@ def rec_numbers_alt(image, model):
         for col in range(9):
             cell = image[curr_row_pixel:curr_row_pixel + cell_height, curr_col_pixel:curr_col_pixel + cell_width]
             # print(cell.sum())
-            if cell[25:35, 25:35].sum() < 0.9 * (255 * 100):  # more than 90 percent of the center is filled
-                # print("Unnumbered Cell")
-                full_row.append(0)
-                # Problem: very, very blurry
-                curr_col_pixel += cell_width
-                continue
+
             # src = cv2.GaussianBlur(cell, (3, 3), 0)
             cell = cell[int(0.1 * cell_width):int(cell_width - 0.1 * cell_width),
                    int(0.1 * cell_height):int(cell_height - 0.1 * cell_height)]
@@ -166,7 +161,11 @@ def rec_numbers_alt(image, model):
             src = cv2.dilate(src, eros_kernel, iterations=1)
             _, cell = cv2.threshold(src, 127, 255, cv2.THRESH_BINARY)
             cell = scale_and_centre(cell, 28, 4)
-
+            if cell[12:16, 12:16].sum() < 0.9 * (255 * 16):  # more than 90 percent of the center is filled
+                # print("Unnumbered Cell")
+                full_row.append(0)
+                curr_col_pixel += cell_width
+                continue
             # w = bbox[1][0] - bbox[0][0]
             # h = bbox[1][1] - bbox[0][1]
             # if w > 0 and h > 0 and (w * h) > 100 and len(cell) > 0:
