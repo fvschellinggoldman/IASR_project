@@ -197,6 +197,9 @@ def main():
         sudoku, sudoku_grid = rec_numbers_alt(warped, model)
         correct_data.append(evaluate_scanned(sudoku_grid, data))
         # solved_sudoku = solve_sudoku(sudoku)
+        MySudokuSolver = SudokuSolver(sudoku_grid)
+        Solved_sudoku = MySudokuSolver.solvePuzzle()
+        
     # total_evaluation() --> performed manually with output from below
     print(correct_data)
     print(file_ids)
