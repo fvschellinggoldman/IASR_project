@@ -1,75 +1,95 @@
-import numpy as np
+# Sudoku Solver using Backtracking Algorithm
+
+# To print the Grid
+def Sudoku_grid(array):
+    for a in range(9):
+        for b in range(9):
+            print(array[a][b])
+        print('n')
 
 
-class SudokuSolver():
-    def __init__(self, puzzle):
-        self.puzzle = puzzle
-        self.puzzle_o = np.array(puzzle, copy=True)
+# To find the empty box
+def empty_box(array, l):
+    for row in range(9):
+        for column in range(9):
+            if (array[row][column] == 0):
+                l[0] = row
+                l[1] = column
+                return True
+    return False
 
-    def grid_ref(self, number):
-        grid_ref = (number // 9, number % 9)
-        return grid_ref
 
-    def value(self, grid, number):
-        g_r = self.grid_ref(number)
-        value = grid[g_r]
-        return value
+# To check if the number is repeated in the row.
+def row_check(array, row, number):
+    for a in range(9):
+        if (array[row][a] == number):
+            return True
+    return False
 
-    def cell(self, grid, number):
-        g_r = self.grid_ref(number)
-        cell_ref = (g_r[0] // 3, g_r[1] // 3)
-        cell = grid[((cell_ref[0]) * 3):((cell_ref[0]) * 3) + 3, ((cell_ref[1]) * 3):((cell_ref[1]) * 3) + 3]
-        return cell
 
-    def row(self, grid, number):
-        g_r = self.grid_ref(number)
-        row_ref = g_r[0]
-        row = grid[(row_ref):(row_ref + 1), 0:9]
-        return row
+# To check if the number is repeated in the column.
+def column_check(array, column, number):
+    for a in range(9):
+        if (array[a][column] == number):
+            return True
+    return False
 
-    def column(self, grid, number):
-        g_r = self.grid_ref(number)
-        column_ref = g_r[1]
-        column = grid[0:9, (column_ref):(column_ref + 1)]
-        return column
 
-    def solvePuzzle(self):
-        forwards = True
-        i = 0
-        while i < 9 * 9:
-            if self.value(self.puzzle_o, i) == 0 and forwards:
-                for a in range(1, 10):
-                    if a not in self.cell(self.puzzle, i) and a not in self.row(self.puzzle,
-                                                                                i) and a not in self.column(self.puzzle,
-                                                                                                            i):
-                        self.puzzle[self.grid_ref(i)] = a
-                        i += 1
-                        break
-                    else:
-                        if a == 9:
-                            forwards = False
-                            i -= 1  # goes back a cell
-                            break
-            elif self.value(self.puzzle_o, i) != 0 and forwards:
-                i += 1
-            elif self.value(self.puzzle_o, i) == 0 and not forwards:
-                if self.puzzle[self.grid_ref(i)] == 9:
-                    self.puzzle[self.grid_ref(i)] = 0
-                    i -= 1
-                else:
-                    for a in range(self.puzzle[self.grid_ref(i)] + 1, 10):
-                        if a not in self.cell(self.puzzle, i) and a not in self.row(self.puzzle,
-                                                                                    i) and a not in self.column(
-                                self.puzzle, i):
-                            self.puzzle[self.grid_ref(i)] = a
-                            forwards = True
-                            i += 1
-                            break
-                        else:
-                            if a == 9:
-                                self.puzzle[self.grid_ref(i)] = 0
-                                i -= 1
-                                break
-            elif self.value(self.puzzle_o, i) != 0 and not forwards:
-                i -= 1
-        return self.puzzle
+# To check if the number is repeated in the cube
+def cube_check(array, row, column, number):
+    for a in range(3):
+        for b in range(3):
+            if (array[a + row][b + column] == number):
+                return True
+    return False
+
+
+# To check for the valid number
+def valid_check(array, row, column, number):
+    return not row_check(array, row, number) and not column_check(array, column, number) and not cube_check(array, row - row % 3,column - column % 3, number)
+
+
+# To check non-duplication across rows, columns, and boxes)
+def sudoku_solve(array):
+    l = [0, 0]
+    if (not empty_box(array, l)):
+        return True
+
+# Assigning list values to row and column that we got from the above Function
+    row = l[0]
+    column = l[1]
+    for number in range(1, 10):
+
+        # if looks promising
+        if (valid_check(array, row, column, number)):
+            array[row][column] = number
+            if (sudoku_solve(array)):
+                return True
+            array[row][column] = 0
+
+    return False #Triggers Backtracking
+
+
+# Driver main function to test above functions
+if __name__ == "__main__":
+
+# To create 2D array for the grid
+    grid = [[0 for i in range(9)] for j in range(9)]
+
+    # assigning values to the grid
+    grid = [[3, 0, 6, 5, 0, 8, 4, 0, 0],
+            [5, 2, 0, 0, 0, 0, 0, 0, 0],
+            [0, 8, 7, 0, 0, 0, 0, 3, 1],
+            [0, 0, 3, 0, 1, 0, 0, 8, 0],
+            [9, 0, 0, 8, 6, 3, 0, 0, 5],
+            [0, 5, 0, 0, 9, 0, 6, 0, 0],
+            [1, 3, 0, 0, 0, 0, 2, 5, 0],
+            [0, 0, 0, 0, 0, 0, 0, 7, 4],
+            [0, 0, 5, 2, 0, 6, 3, 0, 0]]
+
+    # if success print the grid
+    if (sudoku_solve(grid)):
+        Sudoku_grid(grid)
+    else:
+        print
+        "No solution exists"
