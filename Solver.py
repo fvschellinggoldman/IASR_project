@@ -2,17 +2,16 @@
 
 # To print the Grid
 def Sudoku_grid(array):
+    print("Solved Sudoku:")
     for a in range(9):
-        for b in range(9):
-            print(array[a][b])
-        print('n')
+        print(array[a])
 
 
 # To find the empty box
 def empty_box(array, l):
     for row in range(9):
         for column in range(9):
-            if (array[row][column] == 0):
+            if array[row][column] == 0:
                 l[0] = row
                 l[1] = column
                 return True
@@ -22,7 +21,7 @@ def empty_box(array, l):
 # To check if the number is repeated in the row.
 def row_check(array, row, number):
     for a in range(9):
-        if (array[row][a] == number):
+        if array[row][a] == number:
             return True
     return False
 
@@ -30,7 +29,7 @@ def row_check(array, row, number):
 # To check if the number is repeated in the column.
 def column_check(array, column, number):
     for a in range(9):
-        if (array[a][column] == number):
+        if array[a][column] == number:
             return True
     return False
 
@@ -39,7 +38,7 @@ def column_check(array, column, number):
 def cube_check(array, row, column, number):
     for a in range(3):
         for b in range(3):
-            if (array[a + row][b + column] == number):
+            if array[a + row][b + column] == number:
                 return True
     return False
 
@@ -52,7 +51,7 @@ def valid_check(array, row, column, number):
 # To check non-duplication across rows, columns, and boxes)
 def sudoku_solve(array):
     l = [0, 0]
-    if (not empty_box(array, l)):
+    if not empty_box(array, l):
         return True
 
 # Assigning list values to row and column that we got from the above Function
@@ -73,9 +72,6 @@ def sudoku_solve(array):
 # Driver main function to test above functions
 if __name__ == "__main__":
 
-# To create 2D array for the grid
-    grid = [[0 for i in range(9)] for j in range(9)]
-
     # assigning values to the grid
     grid = [[3, 0, 6, 5, 0, 8, 4, 0, 0],
             [5, 2, 0, 0, 0, 0, 0, 0, 0],
@@ -88,8 +84,7 @@ if __name__ == "__main__":
             [0, 0, 5, 2, 0, 6, 3, 0, 0]]
 
     # if success print the grid
-    if (sudoku_solve(grid)):
+    if sudoku_solve(grid):
         Sudoku_grid(grid)
     else:
-        print
-        "No solution exists"
+        print("No solution exists")

@@ -5,6 +5,8 @@ import os
 import operator
 from keras.models import model_from_json
 
+import Solver
+
 
 def load_data_from_folder(folder_location="."):
     data_dict = {}
@@ -180,14 +182,13 @@ def evaluate_scanned(sudoku, data_file):
 
     corr_pct = round(100 * correct_counter / 81, 2)
     err_pct = round(100 - corr_pct, 2)
-    #print("We got {} cells correct, which translates to {} percent correct and {} percent false.".format(correct_counter, corr_pct, err_pct))
-    #print("To ensure a working solver we changed all the wrong recognitions to their actual number.")
+    print("We got {} cells correct, which translates to {} percent correct and {} percent false.".format(correct_counter, corr_pct, err_pct))
+    print("To ensure a working solver we changed all the wrong recognitions to their actual number.")
     return corr_pct
 
 
 def main():
     file_ids, data_dict, image_dict = load_data_from_folder()
-    #exit(0)
     model = load_digit_classifier()
     correct_data = []
     for file_id in file_ids:
@@ -196,11 +197,10 @@ def main():
         warped = recognize_board(image)
         sudoku, sudoku_grid = rec_numbers_alt(warped, model)
         correct_data.append(evaluate_scanned(sudoku_grid, data))
-        # solved_sudoku = solve_sudoku(sudoku)
-        MySudokuSolver = SudokuSolver(sudoku_grid) 
-        #got to try "SudokuSolver(np.array(sudoku_grid))" OR "SudokuSolver(sudoku)" if it doesn't work.
-        Solved_sudoku = MySudokuSolver.solvePuzzle()
-        
+        if Solver.sudoku_solve(sudoku_grid):
+            Solver.Sudoku_grid(sudoku_grid)
+        else:
+            print("No solution exists")
     # total_evaluation() --> performed manually with output from below
     print(correct_data)
     print(file_ids)
